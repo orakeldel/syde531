@@ -113,8 +113,8 @@ for i=1:Nc
     elseif length(find(doi==i))==1
         Sosat=0.6; %MEGH CHANGE THESE
         Ao = kLa*(Sosat-So);
-        f111=[f111, Din*(xin(i)-xat(i)) +r(i) + Ao]; %air on
-        f112=[f112, Din*(xin(i)-xat(i)) +r(i)]; %air off
+        f111=[Din*(xin(i)-xat(i)) +r(i) + Ao]; %air on
+        f112=[Din*(xin(i)-xat(i)) +r(i)]; %air off
 end
 end
 
