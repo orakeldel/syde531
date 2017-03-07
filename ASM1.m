@@ -30,15 +30,32 @@ fns=2.45*10^(-3); %Non-settable fraction of the effluent suspended solids
 xin=[343, 300, 350, 300, 285, 315, 320, 360, 344, 318, 333].*1000 ; %mg/m3 %Component concentration vector infeed
 xat=[202, 200, 150, 116, 129, 197, 156, 144, 133, 140, 202].*1000; %mg/m3 %Component conc. vector in reactor
 %Unknowns- MEGH HELP -at=aeration tank
-Ssat=9999; 
-Soat=9999;
-XBHat=9999;
-XBAat=9999;
-XSat=9999;
-XNDat=9999;
-SNOat=9999;
-SNHat=9999;
-SNDat=9999;
+% Just an array of any length that gives all the values for one day.. Do we
+% need multiple days here? If yes we need to change it in opimization and
+% functions below then...
+% These values should also relate to our a^k but I do not know how...
+SsatArr = rand(1,24); % hourly one day
+SoatArr = rand(1,48); % half-hourly one day
+XBHatArr = rand(1,24); % hourly one day
+XBAatArr = rand(1,24); % hourly one day
+XSatArr = rand(1,24); % hourly one day
+XIatArr = rand(1,24); % hourly one day
+XNDatArr = rand(1,24); % hourly one day
+SNOatArr = rand(1,24); % hourly one day
+SNHatArr = rand(1,24); % hourly one day
+SNDatArr = rand(1,24); % hourly one day
+
+% Functions for interpolation
+Ssat = @(t) SsatArr(1+mod(round(t/3600*24/size(SsatArr, 2)), size(SsatArr, 2))); 
+Soat = @(t) SoatArr(1+mod(round(t/3600*24/size(SoatArr, 2)), size(SoatArr, 2))); 
+XBHat = @(t) XBHatArr(1+mod(round(t/3600*24/size(XBHatArr, 2)), size(XBHatArr, 2))); 
+XBAat = @(t) XBAatArr(1+mod(round(t/3600*24/size(XBAatArr, 2)), size(XBAatArr, 2))); 
+XSat = @(t) XSatArr(1+mod(round(t/3600*24/size(XSatArr, 2)), size(XSatArr, 2))); 
+XIat = @(t) XIatArr(1+mod(round(t/3600*24/size(XIatArr, 2)), size(XIatArr, 2))); 
+XNDat = @(t) XNDatArr(1+mod(round(t/3600*24/size(XNDatArr, 2)), size(XNDatArr, 2))); 
+SNOat = @(t) SNOatArr(1+mod(round(t/3600*24/size(SNOatArr, 2)), size(SNOatArr, 2))); 
+SNHat = @(t) SNHatArr(1+mod(round(t/3600*24/size(SNHatArr, 2)), size(SNHatArr, 2))); 
+SNDat = @(t) SNDatArr(1+mod(round(t/3600*24/size(SNDatArr, 2)), size(SNDatArr, 2))); 
 
 %Kinetic rates
 p1=(uH*Ssat*Soat*XBHat)/((KS+Ssat)*(KOH+Soat));
