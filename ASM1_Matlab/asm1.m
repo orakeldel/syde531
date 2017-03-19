@@ -1,4 +1,4 @@
-function [ ft, ff, total_tn ] = asm1_updated(Qin, COD, blower_conf)
+function [ ft, ff, total_tn ] = asm1(Qin, COD, blower_conf)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
