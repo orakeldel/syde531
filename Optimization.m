@@ -13,6 +13,16 @@ t_off_min = 15*60;  % Min offtime 15 minutes (2.3.2)
 t_off_max = 3600*2; % Max offtime is 2 hours (2.3.2)
 
 TN_max = 0.01;      % gL^-1 of total nitrogen allowed
+% Define Influent Flow Equation
+Q_in = @(t) 1+(-0.32*cos(2*1*pi*t) - 0.18*sin(2*1*pi*t)) + ...
+            (0.23*cos(2*2*pi*t) - 0.01*sin(2*2*pi*t)) + ...
+           (-0.06*cos(2*3*pi*t) - 0.01*sin(2*3*pi*t));
+
+% Define Influent COD Equation
+COD = @(t) 1+(0.24*cos(2*1*pi*t) - 0.20*sin(2*1*pi*t)) + ...
+            (-0.09*cos(2*2*pi*t) + 0.07*sin(2*2*pi*t)) + ...
+           (0.04*cos(2*3*pi*t) - 0.02*sin(2*3*pi*t));
+
 
 % To optimize
 % ak = On time in cycle k (k=1..N)
@@ -36,16 +46,16 @@ beq = [];
 lb = repmat(t_on_min, 1, Nc);
 ub = repmat(t_on_max, 1, Nc);
 
-function y = FTNforIntegral(t)
+%function y = FTNforIntegral(t)
     % integral from t0 to tf = [max(0, FTN(x) - TN_max)]^2dt
     % FTN(x(t)) = SNoat(t) + SNHat(t) + SNDat(t) + fns* (XNDat(t) + iNBM*(XBHat(t) + XBAat(t)) + iNXI*XIat(t))
-    t = mod(t, 3600*24); % We only have info for one day...
-    ftn = SNoat(t) + SNHat(t) + SNDat(t) + fns* (XNDat(t) + iNBM*(XBHat(t) + XBAat(t)) + iNXI*XIat(t));
-    ftn = ftn - repmat(TN_max,size(ftn));
-    y = max(ftn .^ 2 , 0);
-end
+%    t = mod(t, 3600*24); % We only have info for one day...
+%    ftn = SNoat(t) + SNHat(t) + SNDat(t) + fns* (XNDat(t) + iNBM*(XBHat(t) + XBAat(t)) + iNXI*XIat(t));
+%    ftn = ftn - repmat(TN_max,size(ftn));
+%    y = max(ftn .^ 2 , 0);
+% end
 
-ftnintfun = @FTNforIntegral;
+%ftnintfun = @FTNforIntegral;
 
 function [c,ceq] = nonlinearconstraints(x)
     % Bounds for l0-ak = off time
@@ -53,10 +63,10 @@ function [c,ceq] = nonlinearconstraints(x)
     offconstr_max = (repmat(l0, size(x)) - x) - repmat(t_off_max, size(x));
     % constraining maximal total nitrogen
     
-    nitrogenconstr = integrate(ftnintfun, t0, tf);
-    asm = 0;
+    [t, f, tn] = asm1(Q_in, COD, x);
+    nitrogenconstr = max(0,(max(tn) - TN_max));
     c = [offconstr_min,offconstr_max];
-    ceq = [nitrogenconstr, asm];
+    ceq = [nitrogenconstr];
 end
 
 nonlcon = @nonlinearconstraints;
