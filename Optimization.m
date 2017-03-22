@@ -57,7 +57,7 @@ ub = repmat(t_on_max, 1, Nc);
 
 %ftnintfun = @FTNforIntegral;
 lastTN = [];
-numi = 0
+
 function [c,ceq] = nonlinearconstraints(x)
     
     % Bounds for l0-ak = off time
@@ -65,12 +65,11 @@ function [c,ceq] = nonlinearconstraints(x)
     offconstr_max = (repmat(l0, size(x)) - x) - repmat(t_off_max, size(x));
     % constraining maximal total nitrogen
     %tic
-    %[t, f, tn] = asm1(Q_in, COD, divide_on_off(x, Nc));
+    [t, f, tn] = asm1(Q_in, COD, divide_on_off(x, Nc));
     %toc
-    %lastTN = tn;
-    %nitrogenconstr = max(0,(max(tn) - TN_max));
-    numi = numi + 1;
-    nitrogenconstr = 0;
+    lastTN = tn;
+    nitrogenconstr = max(0,(max(tn) - TN_max));
+    %nitrogenconstr = 0;
     c = [offconstr_min,offconstr_max];
     ceq = [nitrogenconstr];
 end
