@@ -1,9 +1,9 @@
 function Optimization
 clc, close all
-load('ASM1.m');
+%load('ASM1.m');
 % Parameters
 Nc = 15;
-Nd = 30;            % Number of days to consider
+Nd = 4;            % Number of days to consider
 t0 = 0;             % initial time (s)
 tf = 3600*24*Nd;    % final time (s)
 l0 = (tf-t0)/(Nd*Nc);
@@ -33,7 +33,7 @@ COD = @(t) 1+(0.24*cos(2*1*pi*t) - 0.20*sin(2*1*pi*t)) + ...
 
 fun = @(x) sum(sum(x));
 
-x0 = repmat(3600*24/Nc/2, 1, Nc); % Start with all ak in half the time open
+x0 = repmat(3600*24/Nc/2, 1, Nc*Nd); % Start with all ak in half the time open
 
 
 % No linear constraints
@@ -56,21 +56,36 @@ ub = repmat(t_on_max, 1, Nc);
 % end
 
 %ftnintfun = @FTNforIntegral;
-
+lastTN = [];
+numi = 0
 function [c,ceq] = nonlinearconstraints(x)
+    
     % Bounds for l0-ak = off time
     offconstr_min = repmat(t_off_min, size(x)) - (repmat(l0, size(x)) - x);
     offconstr_max = (repmat(l0, size(x)) - x) - repmat(t_off_max, size(x));
     % constraining maximal total nitrogen
-    
-    [t, f, tn] = asm1(Q_in, COD, x);
-    nitrogenconstr = max(0,(max(tn) - TN_max));
+    %tic
+    %[t, f, tn] = asm1(Q_in, COD, divide_on_off(x, Nc));
+    %toc
+    %lastTN = tn;
+    %nitrogenconstr = max(0,(max(tn) - TN_max));
+    numi = numi + 1;
+    nitrogenconstr = 0;
     c = [offconstr_min,offconstr_max];
     ceq = [nitrogenconstr];
 end
 
 nonlcon = @nonlinearconstraints;
 
-x = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon)
+options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 5, 'Algorithm', 'sqp');
+
+x = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
+numi
+xx = 1:size(x,2);
+
+subplot(2,1,1);
+plot(xx,lastTN);
+subplot(2,1,2);
+plot(xx,x);
 
 end
