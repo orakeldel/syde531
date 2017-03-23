@@ -3,7 +3,7 @@ clc, close all
 %load('ASM1.m');
 % Parameters
 Nc = 15;
-Nd = 4;            % Number of days to consider
+Nd = 2;            % Number of days to consider
 t0 = 0;             % initial time (s)
 tf = 3600*24*Nd;    % final time (s)
 l0 = (tf-t0)/(Nd*Nc);
@@ -12,7 +12,7 @@ t_on_max = 3600*2;  % Max ontime is 2 hours (2.3.2)
 t_off_min = 15*60;  % Min offtime 15 minutes (2.3.2)
 t_off_max = 3600*2; % Max offtime is 2 hours (2.3.2)
 
-TN_max = 0.01;      % gL^-1 of total nitrogen allowed
+TN_max = 10;      % mgL^-1 of total nitrogen allowed
 % Define Influent Flow Equation
 Q_in = @(t) 1+(-0.32*cos(2*1*pi*t) - 0.18*sin(2*1*pi*t)) + ...
             (0.23*cos(2*2*pi*t) - 0.01*sin(2*2*pi*t)) + ...
@@ -57,18 +57,19 @@ ub = repmat(t_on_max, 1, Nc);
 
 %ftnintfun = @FTNforIntegral;
 lastTN = [];
-
+counter = 0;
 function [c,ceq] = nonlinearconstraints(x)
     
     % Bounds for l0-ak = off time
     offconstr_min = repmat(t_off_min, size(x)) - (repmat(l0, size(x)) - x);
     offconstr_max = (repmat(l0, size(x)) - x) - repmat(t_off_max, size(x));
     % constraining maximal total nitrogen
-    %tic
+    tic
     [t, f, tn] = asm1(Q_in, COD, divide_on_off(x, Nc));
-    %toc
+    toc
     lastTN = tn;
-    nitrogenconstr = max(0,(max(tn) - TN_max));
+    counter = counter + 1
+    nitrogenconstr = max(0,(max(tn(t>1)) - TN_max));
     %nitrogenconstr = 0;
     c = [offconstr_min,offconstr_max];
     ceq = [nitrogenconstr];
@@ -76,14 +77,21 @@ end
 
 nonlcon = @nonlinearconstraints;
 
-options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 5, 'Algorithm', 'sqp');
+
+function stop = outfun(x, optimValues, state)
+    % Preparing x for plotting
+    plotXandTN(x, lastTN, Nc, t0, tf);    
+    save(strcat('step',int2str(optimValues.iteration),'_',Nc,'_',Nd,'.mat'),'a');
+end
+
+options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 5, 'Algorithm', 'sqp','OutputFcn', @outfun);
 
 x = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
-numi
+
 xx = 1:size(x,2);
 
 subplot(2,1,1);
-plot(xx,lastTN);
+plot(lastT,lastTN);
 subplot(2,1,2);
 plot(xx,x);
 
