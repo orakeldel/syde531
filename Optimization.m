@@ -80,8 +80,8 @@ nonlcon = @nonlinearconstraints;
 
 function stop = outfun(x, optimValues, state)
     % Preparing x for plotting
-    %plotXandTN(x, lastTN, Nc, t0, tf);    
-    save(strcat('step',int2str(optimValues.iteration),'_',Nc,'_',Nd,'.mat'),'x');
+    plotXandTN(x, lastTN, Nc, t0, tf);    
+    save(strcat('step',int2str(optimValues.iteration),'_',int2str(Nc),'_',int2str(Nd),'.mat'),'x');
     stop = false;
 end
 
