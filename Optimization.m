@@ -80,8 +80,9 @@ nonlcon = @nonlinearconstraints;
 
 function stop = outfun(x, optimValues, state)
     % Preparing x for plotting
-    plotXandTN(x, lastTN, Nc, t0, tf);    
+    %plotXandTN(x, lastTN, Nc, t0, tf);    
     save(strcat('step',int2str(optimValues.iteration),'_',Nc,'_',Nd,'.mat'),'x');
+    stop = false;
 end
 
 options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun, 'DiffMinChange', 1);
@@ -90,9 +91,6 @@ x = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
 
 xx = 1:size(x,2);
 
-subplot(2,1,1);
-plot(lastT,lastTN);
-subplot(2,1,2);
-plot(xx,x);
+plotXandTN(x, lastTN, Nc, t0, tf);    
 
 end
