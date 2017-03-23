@@ -84,7 +84,7 @@ function stop = outfun(x, optimValues, state)
     save(strcat('step',int2str(optimValues.iteration),'_',Nc,'_',Nd,'.mat'),'x');
 end
 
-options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun);
+options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun, 'DiffMinChange', 1);
 
 x = fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
 
