@@ -3,7 +3,9 @@ function [] = plotXandTN( x, tn, Nc, t0, tf )
 %   Detailed explanation goes here
 
 subplot(2,1,1);
-plot(1:size(tn,2),tn);
+y = 1:max(size(tn));
+y = y./max(size(tn)).*tf + t0;
+plot(y,tn);
 subplot(2,1,2);
 
 yDisp = repmat([1,1,0,0],size(x));
