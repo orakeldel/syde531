@@ -2,7 +2,7 @@ function Optimization
 clc, close all
 %load('ASM1.m');
 % Parameters
-Nc = 15;
+Nc = 20;
 Nd = 2;            % Number of days to consider
 t0 = 0;             % initial time (s)
 tf = 3600*24*Nd;    % final time (s)

@@ -23,7 +23,7 @@ Dws = Q_w/V_reactor;
 BIG_T = [];
 BIG_F = [];
 
-opts = odeset('RelTol',1e-7,'AbsTol',1e-7);
+opts = odeset('RelTol',1e-3,'AbsTol',1e-4);
 
 for i=1:length(blower_conf(:,1))
     
