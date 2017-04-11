@@ -77,12 +77,14 @@ end
 
 nonlcon = @nonlinearconstraints;
 
+iteration_count = 1;
 
 function stop = outfun(x, optimValues, state)
     % Preparing x for plotting
     plotXandTN(x, lastTN, Nc, t0, tf);    
-    save(strcat('step',int2str(optimValues.iteration),'_',int2str(Nc),'_',int2str(Nd),'.mat'),'x');
+    save(strcat('step',int2str(iteration_count),'_',int2str(Nc),'_',int2str(Nd),'.mat'),'x');
     stop = false;
+    iteration_count += 1;
 end
 
 options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun, 'DiffMinChange', 1);

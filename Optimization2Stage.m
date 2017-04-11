@@ -10,7 +10,7 @@ theta = 0.5
 %load('ASM1.m');
 % Parameters
 Nc = 27;
-Nd = 2;            % Number of days to consider
+Nd = 30;            % Number of days to consider
 t0 = 0;             % initial time (s)
 tf = 3600*24*Nd;    % final time (s)
 l0 = (tf-t0)/(Nd*Nc);
@@ -93,7 +93,7 @@ nonlcon = @nonlinearconstraints;
 function stop = outfun(x, optimValues, state)
     % Preparing x for plotting
     plotXandTN(x, lastTN, Nc, t0, tf);    
-    save(strcat('step',int2str(optimValues.iteration),'_',int2str(Nc),'_',int2str(Nd),'.mat'),'x');
+    save(strcat('step',int2str(optimValues.iteration),'_',int2str(Nc),'_',int2str(Nd),'_1.mat'),'x');
     stop = false;
 end
 
@@ -112,11 +112,22 @@ function y = objective(x)
     y = sum(xs) + zbar + theta*sqrt(varz);
 end
 
-options = optimoptions('fmincon','Display', 'iter', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun, 'DiffMinChange', 1);
 
 % Set zero as lower bound to avoid getting negative sf/su
 
-x = fmincon(@(x) objective(x), x0, A, b, Aeq, beq, zeros(size(x0)), [], nonlcon, options)
+% This function does not ensure constraints in intermediat solutions, so
+% has to run till the end, and that takes forever and some.
+% options = optimoptions('fmincon','Display', 'iter-detailed', 'MaxIter', 10, 'Algorithm', 'sqp','OutputFcn', @outfun, 'DiffMinChange', 1);
+% x = fmincon(@(x) objective(x), x0, A, b, Aeq, beq, zeros(size(x0)), [], nonlcon, options)
+
+% This function ensures the constraints, but seams not to do anything :(
+options = setoptimoptions('AlwaysHonorConstraints','All','Display', 'iter', 'MaxIter', 10);
+[sol, fval, exitflag, output] = minimize(@(x) objective(x), x0, A, b, Aeq, beq, zeros(size(x0)), [], nonlcon, options)
+
+save(strcat('final','_',int2str(Nc),'_',int2str(Nd),'.mat'),'sol','fval','exitflag','output');
+
+
+
 
 xs = x(1:end-s_count*2); % actual values
 [t, f, tn] = asm1(Q_in, COD, divide_on_off(xs, Nc));
